@@ -69,6 +69,7 @@ $(function() {
           console.log("resync")
           sync.trigger(function(){});
         }
+        console.log("changesPainter", config.changesPainter)
         config.changesPainter && config.changesPainter();
       });
     });

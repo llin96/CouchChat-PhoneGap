@@ -6,7 +6,7 @@ exports.index = function() {
   var elem = $(this);
   console.log(["config.email", config.email]);
   config.changesPainter = function() {
-    exports.index.apply(this);
+    exports.index.apply(elem);
   };
   config.db.get(["_design","threads","_view","messages", {group_level : 1}], function(err, view) {
     var rows = view.rows.sort(function(a, b){ return new Date(a.value[0]) - new Date(b.value[0])});

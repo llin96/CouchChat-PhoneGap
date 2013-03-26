@@ -6,7 +6,7 @@ function refreshSync(rep, cb) {
   cancel.cancel = true;
   coax.post([config.dbHost, "_replicate"], cancel, function(err) {
     if (err) {
-      console.log("nothing to cancel")
+      console.log(["nothing to cancel", err])
     }
     coax.post([config.dbHost, "_replicate"], rep, cb)
   })
