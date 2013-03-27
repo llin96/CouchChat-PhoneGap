@@ -29,7 +29,7 @@ var pullRep = {
 function triggerSync(cb, retries) {
   if (retries === 0) return cb("too many retries");
   retries = retries || 3;
-  console.log(["triggering sync", pullRep]);
+  console.log(["triggering sync", retries, pullRep]);
   refreshSync(pushRep, function(err, ok) {
     console.log(["pushRep", err, ok])
     // should use some setInterval with repeater until success or timeout...
@@ -39,13 +39,19 @@ function triggerSync(cb, retries) {
         if (tasks.length == 0) {
           return cb('replication not running');
         }
-        var needsLogin = true;
+        var needsLogin = true, offline = true;
         for (var i = 0; i < tasks.length; i++) {
+          if (tasks[i].status != "Offline") {
+            offline = false;
+          }
           if (!tasks[i].error || tasks[i].error[0] != 401) {
             needsLogin = false;
           }
         };
         console.log(["_active_tasks", tasks]);
+        if (offline) {
+          return triggerSync(cb, retries-1);
+        }
         if (needsLogin) {
           window.presentPersonaDialog(config.syncOrigin, function(err, assertion){
             if (err) throw (err);
@@ -88,7 +94,7 @@ function triggerSync(cb, retries) {
           });
         }
       });
-    },500)
+    },1000)
   });
 };
 

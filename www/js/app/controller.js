@@ -35,13 +35,12 @@ exports["/rooms/:id"] = function(params) {
     if(err){return location.hash="/error";}
     elem.html(config.t.room(room));
     elem.find("form").submit(makeNewMessageSubmit(config.email));
+    elem.find("a.photo").click(makeNewPhotoClick(config.email));
     config.changesPainter = function(){
       listMessages(elem.find(".messages"), params.id);
     };
     config.changesPainter();
   });
-  // return;
-  // elem.find("a.photo").click(makeNewPhotoClick(user));
 };
 
 function listMessages (elem, room_id) {
@@ -89,3 +88,37 @@ function makeNewMessageSubmit(email) {
   }
 }
 
+function makeNewPhotoClick(email) {
+    return function(e) {
+      e.preventDefault();
+      if (!(navigator.camera && navigator.camera.getPicture)) {
+        console.error("no navigator.camera.getPicture")
+      } else {
+        var link = this, form = $(link).parent("form"),
+          doc = messageFromForm(email, form);
+        navigator.camera.getPicture(function(picData){
+          doc._attachments = {
+            "picture" : {
+              content_type : "image/jpg",
+              data : picData
+            }
+          };
+          db.post(doc, function(err, ok){
+            if (err) {return console.log("save err",err);}
+            var input = $("form.message [name=markdown]");
+            if (input.val() == doc.markdown) {
+              input.val('');
+            }
+          });
+        }, function(err){
+          console.error(["camera err",err]);
+          $(link).text("Error");
+        }, {
+          quality : 25,
+          targetWidth : 1024,
+          targetHeight : 1024,
+          destinationType: Camera.DestinationType.DATA_URL
+        });
+      }
+    }
+};
