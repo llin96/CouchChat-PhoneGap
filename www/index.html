@@ -24,14 +24,14 @@
         <header>
             <h1>CouchChat PhoneGap</h1>
             <h3>{{user}}</h3>
-            <a href="#/threads/new">New</a>
+            <a href="#/rooms/new">New</a>
             <input class="new" type="submit" value="New"/>
             <div class="clear"/>
         </header>
         <ul>
         {{#rows}}
             <li>
-                <a href="#/thread/{{doc._id}}">{{doc.title}}</a>
+                <a href="#/rooms/{{doc._id}}">{{doc.title}}</a>
                 <br/>
                 <span>{{value.1}} messages</span>
                 <br/>
@@ -60,8 +60,6 @@
             <form class="message">
                 <input type="text" name="markdown" placeholder="your message here"></input>
                 <a href="#" class="photo">Photo</a>
-                <input type="hidden" name="_rev"></input>
-                <input type="hidden" name="_id"></input>
                 <input type="hidden" name="channel_id" value="{{_id}}"></input>
             </form>
         </header>

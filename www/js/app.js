@@ -1,26 +1,14 @@
 $(function() {
   var config = require('./app/config'),
-    home = require("./app/home"),
-    thread = require("./app/thread"),
+    controller = require("./app/controller"),
     sync = require('./app/sync'),
     // libraries
     coax = require("coax"),
     touchlink = require("./touchlink"),
     fastclick = require("fastclick"),
     router = require("./routes-element");
-    // router = require('director').Router;
 
   new fastclick.FastClick(document.body);
-
-  var content = $("#content")[0],
-    contentRoutes = {
-      // "/reload" : home.reload,
-      // "/reloaded" : home.reloaded,
-      "/" : home.index,
-      // "/ready" : home.ready,
-      "/threads/new" : thread.create,
-      "/thread/:id" : thread.view
-    };
 
   var changesSetup = false;
   function setupChanges(changesHandler) {
@@ -60,7 +48,7 @@ $(function() {
       return console.log(err);
     }
     appInit(function(err, email) {
-      var contentRouter = router(contentRoutes, content);
+      var contentRouter = router(controller, $("#content")[0]);
       contentRouter.init();
       setupChanges(function(doc){
         console.log(["dbchange", doc._id, doc.channel_id]);

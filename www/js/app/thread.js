@@ -3,10 +3,6 @@ var config = require("./config"),
   messagesView = db(["_design","threads","_view","messages"]),
   jsonform = require("./jsonform");
 
-function getMessagesView(id, cb) {
-  messagesView([{descending:true, reduce: false, limit:50,
-      startkey : [id,{}], endkey : [id]}], cb);
-}
 
 function makeNewPhotoClick(user) {
     return function(e) {
@@ -49,67 +45,10 @@ function makeNewPhotoClick(user) {
     }
 };
 
-function messageFromForm(author, form) {
-  var doc = jsonform(form);
-  doc.author = author; // todo rename
-  doc.created_at = doc.updated_at = new Date();
-  // doc.seq = last_seq++;
-  doc.type = "chat";
-  return doc;
-};
 
-function makeNewMessageSubmit(email) {
-  return function(e) {
-  e.preventDefault();
-  var form = this, doc = messageFromForm(email, form);
-  // emit([doc.channel_id, doc.seq, doc.updated_at], doc.markdown);
-  if (!doc._rev) delete doc._rev;
-  if (!doc._id) delete doc._id;
 
-  console.log("makeNewMessageSubmit", doc, $(form).find("[name=_id]").val());
-  db.post(doc, function(err, ok){
-    if (err) {
-      $(form).find("[name=_id]").val('');
-      $(form).find("[name=_rev]").val('');
-      return console.log(err);
-    }
-    var input = $(form).find("[name=markdown]");
-    if (input.val() == doc.markdown) {
-      input.val('');
-    }
-    $(form).find("[name=_id]").val('');
-    $(form).find("[name=_rev]").val('');
-  });
-}
-}
 
-function listMessages (elem, room_id) {
-  getMessagesView(room_id, function(err, view) {
-    if(err){return location.hash="/error";}
-    var rows = view.rows;
-    for (var i = 0; i < rows.length; i++) {
-      if (rows[i].value[0] == config.email) {
-        rows[i].who = "mine";
-      }
-    };
-    elem.html(config.t.listMessages(view));
-  });
-}
 
-exports.view = function(params) {
-  var elem = $(this);
-  db.get(params.id, function(err, thread) {
-    if(err){return location.hash="/error";}
-    elem.html(config.t.room(thread));
-    elem.find("form").submit(makeNewMessageSubmit(config.email));
-    config.changesPainter = function(){
-      listMessages(elem.find(".messages"), thread._id);
-    };
-    config.changesPainter();
-  });
-  return;
-  elem.find("a.photo").click(makeNewPhotoClick(user));
-};
 
 exports.create = function(params) {
   console.log("new thread", this, params)
