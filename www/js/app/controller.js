@@ -48,10 +48,15 @@ function listMessages (elem, room_id) {
   messagesView([{descending:true, reduce: false, limit:50,
       startkey : [room_id,{}], endkey : [room_id]}], function(err, view) {
     if(err){return console.log(["listMessages err", err])}
-    var rows = view.rows;
+    // console.log(view)
+    var row, rows = view.rows;
     for (var i = 0; i < rows.length; i++) {
-      if (rows[i].value[0] == config.email) {
-        rows[i].who = "mine";
+      row = rows[i];
+      if (row.value[0] == config.email) {
+        row.who = "mine";
+      }
+      if (row.value[2]) {
+        row.photo = db([row.id, "picture"]).pax.toString();
       }
     };
     elem.html(config.t.listMessages(view));
