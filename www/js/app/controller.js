@@ -8,10 +8,10 @@ var config = require('./config'),
 exports["/"] = function () {
   // render index content html
   var elem = $(this);
-  console.log("init / changesPainter");
-  config.changesPainter = function() {
-    exports.index.apply(elem);
+  window.changesPainter = function() {
+    exports["/"].apply(elem);
   };
+  console.log(["init changesPainter", window.changesPainter.toString()]);
   messagesView({group_level : 1}, function(err, view) {
     var rows = view.rows.sort(function(a, b){ return new Date(a.value[0]) - new Date(b.value[0])});
     async.map(rows, function(row, cb) {
@@ -37,10 +37,10 @@ exports["/rooms/:id"] = function(params) {
     elem.html(config.t.room(room));
     elem.find("form").submit(makeNewMessageSubmit(config.email));
     elem.find("a.photo").click(makeNewPhotoClick(config.email));
-    config.changesPainter = function(){
+    window.changesPainter = function(){
       listMessages(elem.find(".messages"), params.id);
     };
-    config.changesPainter();
+    window.changesPainter();
   });
 };
 
