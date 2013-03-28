@@ -8,6 +8,7 @@ var config = require('./config'),
 exports["/"] = function () {
   // render index content html
   var elem = $(this);
+  console.log("init / changesPainter");
   config.changesPainter = function() {
     exports.index.apply(elem);
   };

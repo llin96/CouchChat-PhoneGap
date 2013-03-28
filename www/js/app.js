@@ -52,13 +52,13 @@ $(function() {
       contentRouter.init();
       setupChanges(function(doc){
         console.log(["dbchange", doc._id, doc.channel_id]);
+        console.log(["changesPainter", config.changesPainter])
+        config.changesPainter && config.changesPainter();
         if (doc.channel_id == doc._id) {
           // workaround for https://github.com/couchbaselabs/sync_gateway/issues/31
           console.log("resync")
           sync.trigger(function(){});
         }
-        console.log("changesPainter", config.changesPainter)
-        config.changesPainter && config.changesPainter();
       });
     });
   });
