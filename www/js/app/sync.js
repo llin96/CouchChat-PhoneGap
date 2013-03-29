@@ -27,42 +27,61 @@ var pullRep = {
 // if success cancel poll, cb no error
 // if needsLogin cancel poll, cb with error
 // if timeout cancel poll, cb with error
-function pollForSyncSuccess(timeout, session_id, cb) {
-  var done = false, lastTask, poller = setInterval(function(){
-    config.dbServer.get("_active_tasks", function(err, tasks){
-      if (err) return; // try again
 
-      var needsLogin = true, offline = true;
-      for (var i = 0; i < tasks.length; i++) {
-        if (tasks[i].task == session_id) {
-          lastTask = tasks[i];
+function parseActiveTasks(body, id) {
+  var row, rows = [], lines = body.split(/\n/);
+  for (var i = 0; i < lines.length; i++) {
+    if (lines[i]) {
+      try {
+        row = JSON.parse(lines[i]);
+        if (row.task == id) {
+          rows.push(row);
         }
-      };
-      console.log(["_active_tasks", lastTask]);
-      if (lastTask.status == "Idle" || lastTask.status == "Stopped") {
+      } catch (e) {}
+    }
+  };
+  return rows[rows.length-1];
+}
+
+function onXHRChange(xhr, cb) {
+  var orsc = xhr._object.onreadystatechange;
+  xhr._object.onreadystatechange = function(){
+    cb.apply(this, arguments);
+    orsc.apply(this, arguments);
+  }
+}
+
+function waitForSyncSuccess(timeout, session_id, cb) {
+  var task, done = false;
+  var errorTimeout = setTimeout(function() {
+    if (done) return;
+    done = true;
+    cb("timeout", task);
+  }, timeout);
+  var req = config.dbServer.get(["_active_tasks", {feed : "continuous"}], function(){});
+  onXHRChange(req, function(){
+    if (done) return;
+    var offline = true, needsLogin = true;
+    if (this.responseText) {
+      task = parseActiveTasks(this.responseText, session_id);
+      if (task.status == "Idle" || task.status == "Stopped") {
         // todo maybe we are cool with tasks that have Processed > 0 changes
         offline = false;
       }
-      if (!lastTask.error || lastTask.error[0] != 401) {
+      if (!task.error || task.error[0] != 401) {
         needsLogin = false;
       }
-      if (!offline) {
-        clearInterval(poller);
+      if (needsLogin) {
+        clearTimeout(errorTimeout);
         done = true;
-        if (needsLogin) {
-          cb("needsLogin", lastTask);
-        } else {
-          cb(false, lastTask);
-        }
+        cb("needsLogin", task);
+      } else if (!offline) {
+        clearTimeout(errorTimeout);
+        done = true;
+        cb(false, task);
       }
-    })
-  }, 250);
-  setTimeout(function() {
-    clearInterval(poller);
-    if (!done) {
-      cb("timeout", lastTask);
     }
-  }, timeout);
+  });
 }
 
 function loginWithPersona(cb) {
@@ -98,7 +117,7 @@ function triggerSync(cb, retries) {
   console.log(["triggering sync", retries, pullRep]);
   refreshSync(pushRep, function(err, ok) {
     console.log(["pushRep", err, ok.session_id])
-    pollForSyncSuccess(5000, ok.session_id, function(err, status){
+    waitForSyncSuccess(5000, ok.session_id, function(err, status){
       if (err == "needsLogin") {
         loginWithPersona(function(err, info){
           if (err) return cb(err);
