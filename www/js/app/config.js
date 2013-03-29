@@ -49,6 +49,14 @@ var ddoc = {
         }
         return [max, count, lastSender];
       }.toString()
+    },
+    users : {
+      map : function(doc){
+        if (doc.type == "profile") {
+          var name = doc.nick || doc._id.replace(/^profile:/,'');
+          emit(name);
+        }
+      }.toString()
     }
   }
 }

@@ -75,18 +75,22 @@
 </ul>
 </script>
 
-<script type="text/mustache" id="newThread-mu">
+<script type="text/mustache" id="newRoom-mu">
 <header>
     <h2>
-       {{user}}, invite friends to chat
+        Invite to Chat
     </h2>
 </header>
 <article>
-    <form><label>Members</label>
-    <input size="60" type="text" name="members" placeholder="@jchris @amysue"></input>
-    <br/>
-    <label>Invite</label>
-    <input type="submit" value="Send"></input>
+    <form>
+    <input size="60" type="text" name="title" placeholder="Room Title (optional)"></input>
+    <input type="submit" value="Invite"></input>
+    <p>Choose people to invite:</p>
+    <ul>
+    {{#rows}}
+        <li><input type="checkbox" name="members" value="{{id}}"> {{key}}</li>
+    {{/rows}}
+    </ul>
     </form>
 </article>
 </script>

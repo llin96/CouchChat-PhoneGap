@@ -1,6 +1,7 @@
 var config = require('./config'),
   db = config.db,
   messagesView = db(["_design","threads","_view","messages"]),
+  usersView = db(["_design","threads","_view","users"]),
   async = require("async"),
   jsonform = require("./jsonform");
 
@@ -28,7 +29,37 @@ exports["/"] = function () {
 
 exports["/rooms/new"] = function () {
   // body...
-  console.log("new room!")
+  var elem = $(this);
+  usersView(function(err, view){
+    var rows = [];
+    for (var i = 0; i < view.rows.length; i++) {
+      if (view.rows[i].id !== "profile:"+window.email) {
+        rows.push(view.rows[i]);
+      }
+    };
+    elem.html(config.t.newRoom({rows:rows}));
+    elem.find("form").submit(function(e) {
+      e.preventDefault();
+      var doc = jsonform(this);
+      doc.owners = [window.email]; // todo rename
+
+      console.log(doc)
+
+      // doc.created_at = doc.updated_at = new Date();
+      // doc._id = doc.thread_id = Math.random().toString(20).slice(2);
+      // doc.type = "thread";
+      // db.post(doc, function(err, ok) {
+      //   console.log(err, ok);
+      //   location.hash = "/thread/"+ok.id;
+      // });
+      return false;
+    });
+  });
+
+
+
+
+
 }
 
 exports["/rooms/:id"] = function(params) {
