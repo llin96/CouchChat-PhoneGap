@@ -21,7 +21,7 @@ exports["/"] = function () {
         cb(err, row);
       });
     }, function(err, results){
-      elem.html(config.t.index({user: config.email, rows : results}))
+      elem.html(config.t.index({user: window.email, rows : results}))
     });
   });
 };
@@ -36,8 +36,8 @@ exports["/rooms/:id"] = function(params) {
   db.get(params.id, function(err, room) {
     if(err){return location.hash="/error";}
     elem.html(config.t.room(room));
-    elem.find("form").submit(makeNewMessageSubmit(config.email));
-    elem.find("a.photo").click(makeNewPhotoClick(config.email));
+    elem.find("form").submit(makeNewMessageSubmit(window.email));
+    elem.find("a.photo").click(makeNewPhotoClick(window.email));
     window.changesPainter = function(){
       listMessages(elem.find(".messages"), params.id);
     };
@@ -53,7 +53,7 @@ function listMessages (elem, room_id) {
     var row, rows = view.rows;
     for (var i = 0; i < rows.length; i++) {
       row = rows[i];
-      if (row.value[0] == config.email) {
+      if (row.value[0] == window.email) {
         row.who = "mine";
       }
       if (row.value[2]) {

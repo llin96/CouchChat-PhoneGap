@@ -35,7 +35,7 @@ $(function() {
         return;
       }
       if (user && user.email) {
-        config.email = user.email;
+        window.email = user.email;
         config.db.put("profile:"+user.email, {type : "profile"}, function() {
           cb(false, user.email);
         });
