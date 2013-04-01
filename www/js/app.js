@@ -31,7 +31,7 @@ $(function() {
   function appInit(cb) {
     sync.trigger(function(err, user){
       if (err) {
-        console.log(["login err", err]);
+        alert(err);
         return;
       }
       if (user && user.email) {

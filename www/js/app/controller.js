@@ -12,7 +12,6 @@ exports["/"] = function () {
   window.changesPainter = function() {
     exports["/"].apply(elem);
   };
-  console.log(["init changesPainter", window.changesPainter.toString()]);
   messagesView({group_level : 1}, function(err, view) {
     console.log(['sort these', view.rows]);
     var rows = view.rows.sort(function(a, b){ return new Date(b.value[0]) - new Date(a.value[0])});
@@ -22,13 +21,14 @@ exports["/"] = function () {
         cb(err, row);
       });
     }, function(err, results){
-      elem.html(config.t.index({user: window.email, rows : results}))
+      elem.html(config.t.index({user: window.email, rows : results}));
     });
   });
 };
 
+// $.ajax({url:"http://lite.couchbase./mydb/dide17d761gi",success:console.log})
 exports["/rooms/new"] = function () {
-  // body...
+  window.changesPainter = function(){};
   var elem = $(this);
   usersView(function(err, view){
     var rows = [];
@@ -41,25 +41,31 @@ exports["/rooms/new"] = function () {
     elem.find("form").submit(function(e) {
       e.preventDefault();
       var doc = jsonform(this);
-      doc.owners = [window.email]; // todo rename
-
-      console.log(doc)
-
-      // doc.created_at = doc.updated_at = new Date();
-      // doc._id = doc.thread_id = Math.random().toString(20).slice(2);
-      // doc.type = "thread";
-      // db.post(doc, function(err, ok) {
-      //   console.log(err, ok);
-      //   location.hash = "/thread/"+ok.id;
-      // });
+      doc.title = doc.title || new Date();
+      doc.members = doc.members || [];
+      if (!Array.isArray(doc.members)) {
+        doc.members = [doc.members];
+      }
+      doc.owners = [window.email];
+      doc.created_at = doc.updated_at = new Date();
+      doc._id = doc.channel_id = Math.random().toString(20).slice(2);
+      doc.type = "room";
+      db.post(doc, function(err, ok) {
+        var announce = {
+          type : "chat",
+          created_at : new Date(),
+          author : window.email,
+          channel_id : ok.id,
+          style : "announcement",
+          markdown : window.email+" started this room and invited "+doc.members.join(', ')+"."
+        };
+        db.post(announce, function(err, ok) {
+          location.hash = "/rooms/"+doc._id;
+        });
+      });
       return false;
     });
   });
-
-
-
-
-
 }
 
 exports["/rooms/:id"] = function(params) {

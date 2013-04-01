@@ -53,8 +53,8 @@ var ddoc = {
     users : {
       map : function(doc){
         if (doc.type == "profile") {
-          var name = doc.nick || doc._id.replace(/^profile:/,'');
-          emit(name);
+          var key = doc._id.replace(/^profile:/,''), name = doc.nick || key;
+          emit(key, name);
         }
       }.toString()
     }

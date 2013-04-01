@@ -100,7 +100,7 @@ function setupLocalUser(info, cb) {
       });
     } else {
       if (user.email !== info.email) {
-        cb("this device is already synced for "+user.email);
+        cb("This device is already synced for "+user.email+". To to change users please uninstall and reinstall.");
       } else {
         cb(false, user);
       }
